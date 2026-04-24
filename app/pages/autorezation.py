@@ -4,6 +4,7 @@ from wtforms import StringField, TextAreaField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, Email
 from ..db_session import create_session
 from ..models import User
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -27,15 +28,29 @@ def auth(app):
         form = RegisterForm()
         if form.validate_on_submit():
             db_sess = create_session()
-            user = User(
-                nickname=form.nickname.data,
-                email = form.email.data,
-                hashed_password = generate_password_hash(form.password.data))
-            db_sess.add(user)
-            db_sess.commit()
-            db_sess.close()
-            flash("Регистрация успешна!", "success")
-            return redirect(url_for("login"))
+            try:
+                form = RegisterForm()
+                if form.validate_on_submit():
+                    db_sess = create_session()
+                    user = User(
+                        nickname=form.nickname.data,
+                        email=form.email.data,
+                        hashed_password=generate_password_hash(form.password.data))
+                    db_sess.add(user)
+                    db_sess.commit()
+                    db_sess.close()
+                    flash("Регистрация успешна!", "success")
+                    return redirect(url_for("login"))
+            except IntegrityError:
+                db_sess.rollback()
+                db_sess.close()
+                flash("Этот email или никнейм уже заняты. Попробуйте другой.", "danger")
+                return redirect(url_for("register"))
+            except Exception as e:
+                db_sess.rollback()
+                db_sess.close()
+                flash(f"Произошла ошибка: {e}", "danger")
+                return redirect(url_for("register"))
         return render_template("autorezation/register.html", form=form)
 
     @app.route("/login", methods=["GET", "POST"])
