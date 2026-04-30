@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Новый отзыв | Приятный досуг{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h3 class="mb-4">Написать новый отзыв</h3>
+                    <form method="POST" novalidate id="review-form">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.category.label(class="form-label") }}
+                            {{ form.category(class="form-select", id="category-select") }}
+                            {% for error in form.category.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control") }}
+                            {% for error in form.title.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.content.label(class="form-label") }}
+                            {{ form.content(class="form-control", rows="5") }}
+                            {% for error in form.content.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.rating.label(class="form-label") }}
+                            {{ form.rating(class="form-control", type="number", min=1, max=10) }}
+                            {% for error in form.rating.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                        </div>
+
+                        <div id="map-container" class="mb-4 d-none">
+                            <label class="form-label fw-bold">Укажите место на карте</label>
+
+                            <div class="input-group mb-2">
+                                {{ form.address(class="form-control", placeholder="Введите адрес или кликните на карту", id="address-input") }}
+                            </div>
+
+                            <div id="yandex-map" style="width: 100%; height: 300px; background-color: #eee; border-radius: 8px;"></div>
+
+                            {{ form.lat(id="lat-input") }}
+                            {{ form.lon(id="lon-input") }}
+
+                            <div class="form-text text-muted small mt-1">Кликните на карту, чтобы поставить метку и определить адрес.</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            {{ form.submit(class="btn btn-success") }}
+                            <a href="{{ url_for('profile') }}" class="btn btn-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://api-maps.yandex.ru/2.1/?apikey=32887a74-9caf-4d9c-bfbc-abb36b3adb96&lang=ru_RU" type="text/javascript"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categorySelect = document.getElementById('category-select');
+        const mapContainer = document.getElementById('map-container');
+        const latInput = document.getElementById('lat-input');
+        const lonInput = document.getElementById('lon-input');
+        const addressInput = document.getElementById('address-input');
+        let myMap;
+
+        function initMap() {
+            if (myMap) return;
+
+            myMap = new ymaps.Map("yandex-map", {
+                center: [55.741906, 52.410292],
+                zoom: 12
+            });
+
+            myMap.events.add('click', function (e) {
+                var coords = e.get('coords');
+
+                myMap.geoObjects.removeAll();
+                myMap.geoObjects.add(new ymaps.Placemark(coords));
+
+                latInput.value = coords[0];
+                lonInput.value = coords[1];
+
+                ymaps.geocode(coords).then(function (res) {
+                    var firstGeoObject = res.geoObjects.get(0);
+                    if (firstGeoObject) {
+                        addressInput.value = firstGeoObject.getAddressLine();
+                    }
+                });
+            });
+        }
+
+        categorySelect.addEventListener('change', function() {
+            if (this.value === 'places') {
+                mapContainer.classList.remove('d-none');
+                if (!myMap && typeof ymaps !== 'undefined') {
+                    ymaps.ready(initMap);
+                }
+            } else {
+                mapContainer.classList.add('d-none');
+                latInput.value = '';
+                lonInput.value = '';
+                addressInput.value = '';
+            }
+        });
+    });
+</script>
+{% endblock %}

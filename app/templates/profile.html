@@ -1,10 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block title %}Профиль {{ user.nickname }} | Приятный досуг{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <div class="mb-3">
+                        {% if user.avatar %}
+                            <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}"
+                                 class="rounded-circle shadow"
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto shadow"
+                                 style="width: 150px; height: 150px; font-size: 4rem; font-weight: bold;">
+                                {{ user.nickname[0].upper() }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <h4 class="card-title mb-1">{{ user.nickname }}</h4>
+                    <p class="text-muted small">{{ user.email }}</p>
+                    <hr>
+
+                    <h6 class="text-start text-muted">О себе:</h6>
+                    <p class="text-start small">
+                        {% if user.about %}
+                            {{ user.about }}
+                        {% else %}
+                            <em class="text-muted">Пользователь ничего не рассказал о себе.</em>
+                        {% endif %}
+                    </p>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{{ url_for('create_review') }}" class="btn btn-success w-100 mb-2">+ Написать отзыв</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Выйти из аккаунта</a>
+                        <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-secondary">Редактировать профиль</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h3 class="mb-4">Мои отзывы</h3>
+
+            {% if user.reviews %}
+                {% for review in user.reviews|reverse %}
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ review.title }}</h5>
+                                <span class="badge
+                                    {%- if review.rating >= 8 %} bg-success
+                                    {%- elif review.rating >= 5 %} bg-warning text-dark
+                                    {%- else %} bg-danger {% endif -%}
+                                    fs-6">
+                                    {{ review.rating }}/10
+                                </span>
+                            </div>
+
+                            <div class="mb-2">
+                                <span class="badge bg-light text-dark border me-1">
+                                    {% if review.category == 'books' %}Книга
+                                    {% elif review.category == 'movies' %}Фильм
+                                    {% elif review.category == 'places' %}Место
+                                    {% else %}Отзыв {% endif %}
+                                </span>
+                                <small class="text-muted">
+                                    {{ review.created_date.strftime('%d.%m.%Y') }}
+                                </small>
+                            </div>
+
+                            <p class="card-text">{{ review.content }}</p>
+
+                            {% if review.category == 'places' and review.address %}
+                                <div class="alert alert-light border small py-2 mb-0">
+                                     {{ review.address }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info text-center py-5">
+                    <h5>У вас пока нет отзывов</h5>
+                    <p class="text-muted">Самое время поделиться впечатлениями!</p>
+                    <a href="{{ url_for('create_review') }}" class="btn btn-success mt-2">Написать первый отзыв</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

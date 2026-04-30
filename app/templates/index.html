@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Главная | Приятный досуг{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Последние отзывы</h2>
+
+    {% if reviews %}
+        {% for review in reviews %}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ review.title }}</h5>
+                    
+                    <div class="mb-2">
+                        <span class="badge bg-light text-dark border me-1">
+                            {% if review.category == 'books' %}Книга
+                            {% elif review.category == 'movies' %}Фильм
+                            {% elif review.category == 'places' %}Место
+                            {% endif %}
+                        </span>
+                        <span class="badge bg-success">{{ review.rating }}/10</span>
+                        <small class="text-muted ms-2">
+                            Автор: {{ review.author.nickname }}
+                        </small>
+                    </div>
+
+                    <p class="card-text">{{ review.content[:200] }}{% if review.content|length > 200 %}...{% endif %}</p>
+
+                    {% if review.category == 'places' %}
+                        <div class="mt-2">
+                            <span class="badge bg-light text-dark border">{{ review.address if review.address else 'Адрес не указан' }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info text-center">
+            Отзывов пока нет. Будь первым!
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

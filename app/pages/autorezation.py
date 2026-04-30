@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask import url_for, session, redirect, flash, render_template
-from wtforms import StringField, TextAreaField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Length, Email
+from wtforms import StringField, TextAreaField, PasswordField, SubmitField, IntegerField, SelectField, HiddenField
+from wtforms.validators import DataRequired, Length, Email, NumberRange
 from ..db_session import create_session
 from ..models import User
 from sqlalchemy.exc import IntegrityError
@@ -71,3 +71,20 @@ def auth(app):
     def logout():
         session.pop("user_id", None)
         return redirect(url_for("index"))
+
+
+class ReviewForm(FlaskForm):
+    title = StringField("Заголовок", validators=[DataRequired(), Length(max=100)])
+    content = TextAreaField("Текст отзыва", validators=[DataRequired()])
+    rating = IntegerField("Рейтинг (1-10)", validators=[DataRequired(), NumberRange(min=1, max=10)])
+    category = SelectField("Категория", choices=[
+        ('books', ' Книга'),
+        ('movies', ' Фильм'),
+        ('places', ' Место')
+    ], validators=[DataRequired()])
+    address = StringField("Адрес места")  # Видимое поле для адреса
+    lat = HiddenField('lat')  # Скрытое для широты
+    lon = HiddenField('lon')  # Скрытое для долготы
+
+    submit = SubmitField("Опубликовать")
+
