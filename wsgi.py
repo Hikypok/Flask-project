@@ -1,7 +1,7 @@
 import sys
 import os
 
-path = '/home/Hikypok/Приятный досуг'
+path = '/home/hikypok/myproject'
 if path not in sys.path:
     sys.path.append(path)
 
