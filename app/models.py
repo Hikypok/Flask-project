@@ -21,6 +21,7 @@ class Review(SqlAlchemyBase):
     title = sa.Column(sa.String, nullable=False)
     content = sa.Column(sa.Text, nullable=False)
     rating = sa.Column(sa.Integer, nullable=False)
+    photo = sa.Column(sa.String(200), nullable=True)
     category = sa.Column(sa.String, nullable=False)
     created_date = sa.Column(sa.DateTime, default=datetime.datetime.now)
 

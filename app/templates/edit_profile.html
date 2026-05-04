@@ -1,33 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Редактирование профиля | Приятный досуг{% endblock %}
-
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
-                    <h3 class="mb-4">Редактировать профиль</h3>
-                    <form method="POST" novalidate>
+                    <h3 class="mb-4 text-center">Редактировать профиль</h3>
+                    <form method="POST" novalidate enctype="multipart/form-data">
                         {{ form.hidden_tag() }}
-
                         <div class="mb-3">
                             {{ form.nickname.label(class="form-label fw-semibold") }}
-                            {{ form.nickname(class="form-control") }}
+                            {{ form.nickname(class="form-control", placeholder="Ваш никнейм") }}
                             {% for error in form.nickname.errors %}
                                 <div class="text-danger small mt-1">{{ error }}</div>
                             {% endfor %}
                         </div>
-
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Аватарка</label>
+                            {% if user.avatar %}
+                                <div class="text-center mb-2">
+                                    <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}"
+                                         class="rounded-circle shadow-sm"
+                                         style="width: 100px; height: 100px; object-fit: cover;">
+                                    <p class="small text-muted mt-1">Текущая аватарка</p>
+                                </div>
+                            {% endif %}
+                            <div class="input-group">
+                                {{ form.avatar_file(class="form-control") }}
+                            </div>
+                            <div class="form-text text-muted small">
+                                Допустимые форматы: PNG, JPG, JPEG, GIF. Макс. размер: 16 МБ.
+                            </div>
+                            {% for error in form.avatar_file.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
                         <div class="mb-4">
                             {{ form.about.label(class="form-label fw-semibold") }}
-                            {{ form.about(class="form-control", rows="4") }}
+                            {{ form.about(class="form-control", rows="4", placeholder="Расскажите немного о себе") }}
                             {% for error in form.about.errors %}
                                 <div class="text-danger small mt-1">{{ error }}</div>
                             {% endfor %}
                         </div>
                         <div class="d-grid gap-2">
-                            {{ form.submit(class="btn btn-success") }}
+                            {{ form.submit(class="btn btn-success btn-lg") }}
                             <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">Отмена</a>
                         </div>
                     </form>

@@ -12,11 +12,11 @@
                     <div class="mb-3">
                         {% if user.avatar %}
                             <img src="{{ url_for('static', filename='avatars/' + user.avatar) }}"
-                                 class="rounded-circle shadow"
-                                 style="width: 150px; height: 150px; object-fit: cover;">
+                                class="rounded-circle shadow"
+                                style="width: 150px; height: 150px; object-fit: cover;">
                         {% else %}
                             <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto shadow"
-                                 style="width: 150px; height: 150px; font-size: 4rem; font-weight: bold;">
+                                style="width: 150px; height: 150px; font-size: 4rem; font-weight: bold;">
                                 {{ user.nickname[0].upper() }}
                             </div>
                         {% endif %}
@@ -43,7 +43,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-8">
             <h3 class="mb-4">Мои отзывы</h3>
 
@@ -73,6 +72,14 @@
                                     {{ review.created_date.strftime('%d.%m.%Y') }}
                                 </small>
                             </div>
+                            {% if review.photo %}
+                                <div class="mt-3 mb-3">
+                                    <img src="{{ url_for('static', filename='review_photos/' + review.photo) }}"
+                                        class="img-fluid rounded shadow-sm"
+                                        style="max-height: 300px; object-fit: cover;"
+                                        onerror="this.style.display='none'; console.log('Не удалось загрузить фото:', this.src)">
+                                </div>
+                            {% endif %}
 
                             <p class="card-text">{{ review.content }}</p>
 
