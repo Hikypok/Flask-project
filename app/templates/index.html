@@ -4,51 +4,125 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Последние отзывы</h2>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('index') }}" class="row g-3 align-items-end">
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Категория</label>
+                    <select name="category" class="form-select" onchange="this.form.submit()">
+                        <option value="">Все категории</option>
+                        <option value="books" {% if current_category=='books' %}selected{% endif %}>Книги</option>
+                        <option value="movies" {% if current_category=='movies' %}selected{% endif %}>Фильмы</option>
+                        <option value="places" {% if current_category=='places' %}selected{% endif %}>Места</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Поиск</label>
+                    <input type="text" name="search" class="form-control"
+                           placeholder="По заголовку или тексту..."
+                           value="{{ current_search }}">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Сортировка</label>
+                    <select name="sort" class="form-select" onchange="this.form.submit()">
+                        <option value="newest" {% if current_sort=='newest' %}selected{% endif %}>Новые сверху</option>
+                        <option value="oldest" {% if current_sort=='oldest' %}selected{% endif %}>Старые сверху</option>
+                        <option value="rating_high" {% if current_sort=='rating_high' %}selected{% endif %}>Рейтинг:
+                            высокий
+                        </option>
+                        <option value="rating_low" {% if current_sort=='rating_low' %}selected{% endif %}>Рейтинг:
+                            низкий
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary w-100">Сбросить</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            Последние отзывы
+            {% if current_category or current_search %}
+            <small class="text-muted fs-6">
+                (найдено: {{ reviews|length }})
+            </small>
+            {% endif %}
+        </h2>
+
+        {% if current_category or current_search %}
+        <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-primary">
+            Очистить фильтры
+        </a>
+        {% endif %}
+    </div>
 
     {% if reviews %}
-        {% for review in reviews %}
-            <div class="card shadow-sm border-0 mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">{{ review.title }}</h5>
-                    
-                    <div class="mb-2">
-                        <span class="badge bg-light text-dark border me-1">
-                            {% if review.category == 'books' %}Книга
-                            {% elif review.category == 'movies' %}Фильм
-                            {% elif review.category == 'places' %}Место
-                            {% endif %}
-                        </span>
-                        <span class="badge bg-success">{{ review.rating }}/10</span>
-                        <small class="text-muted ms-2">
-                            Автор: {{ review.author.nickname }}
-                        </small>
-                    </div>
+    {% for review in reviews %}
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ review.title }}</h5>
 
-                    <p class="card-text">{{ review.content[:200] }}{% if review.content|length > 200 %}...{% endif %}</p>
-                    {% if review.photo %}
-                        <div class="mt-3 mb-3">
-                            <img src="{{ url_for('static', filename='review_photos/' + review.photo) }}"
-                                class="img-fluid rounded shadow-sm"
-                                style="max-height: 300px; object-fit: cover;"
-                                onerror="this.style.display='none'; console.log(' Не удалось загрузить фото:', this.src)">
-                        </div>
-                    {% endif %}
-
-                    {% if review.category == 'places' %}
-                        <div class="mt-2">
-                            <span class="badge bg-light text-dark border">{{ review.address if review.address else 'Адрес не указан' }}
-                            </span>
-                        </div>
-                    {% endif %}
-
+            <div class="mb-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-dark border">
+                        {% if review.category == 'books' %}Книга
+                        {% elif review.category == 'movies' %}Фильм
+                        {% elif review.category == 'places' %}Место
+                        {% endif %}
+                    </span>
+                    <span class="badge bg-success">{{ review.rating }}/10</span>
+                    <small class="text-muted">Автор: {{ review.author.nickname }}</small>
                 </div>
+                <small class="text-muted">{{ review.created_date.strftime('%d.%m.%Y') }}</small>
             </div>
-        {% endfor %}
-    {% else %}
-        <div class="alert alert-info text-center">
-            Отзывов пока нет. Будь первым!
+
+            <p class="card-text">{{ review.content[:200] }}{% if review.content|length > 200 %}...{% endif %}</p>
+
+            {% if review.category == 'places' and review.address %}
+            <div class="mt-2">
+                            <span class="badge bg-light text-dark border">
+                                {{ review.address }}
+                            </span>
+            </div>
+            {% endif %}
+
+            {% if review.photo %}
+            <div class="mt-3">
+                <img src="{{ url_for('static', filename='review_photos/' + review.photo) }}"
+                     class="img-fluid rounded"
+                     style="max-height: 300px; object-fit: cover;">
+            </div>
+            {% endif %}
+            {% if session.get('user_id') == review.author_id %}
+            <div class="mt-3 pt-2 border-top">
+                <form method="POST" action="{{ url_for('delete_review', review_id=review.id) }}"
+                      class="d-inline"
+                      onsubmit="return confirm('Удалить этот отзыв?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                </form>
+            </div>
+            {% endif %}
         </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-info text-center">
+        {% if current_category or current_search %}
+        Ничего не найдено по вашим критериям.
+        <a href="{{ url_for('index') }}">Попробовать другие фильтры</a>
+        {% else %}
+        Отзывов пока нет. Будь первым!
+        {% endif %}
+    </div>
     {% endif %}
 </div>
 {% endblock %}

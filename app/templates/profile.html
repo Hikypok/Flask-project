@@ -80,6 +80,13 @@
                                         onerror="this.style.display='none'; console.log('Не удалось загрузить фото:', this.src)">
                                 </div>
                             {% endif %}
+                            {% if session.get('user_id') == review.author_id %}
+                                <form method="POST" action="{{ url_for('delete_review', review_id=review.id) }}"
+                                    class="d-inline float-end"
+                                    onsubmit="return confirm('Удалить этот отзыв навсегда?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                                </form>
+                            {% endif %}
 
                             <p class="card-text">{{ review.content }}</p>
 
