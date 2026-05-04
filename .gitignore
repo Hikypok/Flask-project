@@ -1,6 +1,9 @@
-venv/
-.venv/
+app/static/avatars/*
+app/static/review_photos/*
+
 __pycache__/
-*.db
-.idea/
-.env
+*.pyc
+.pytest_cache/
+.DS_Store
+Thumbs.db
+
