@@ -29,17 +29,21 @@ def save_review_photo(file):
     if not file or file.filename == '':
         return None
     filename = secure_filename(file.filename)
-    ext = filename.rsplit('.', 1)[1].lower()
-    allowed_ext = {'png', 'jpg', 'jpeg', 'gif'}
-    if ext not in allowed_ext:
-        return None
 
+    if '.' not in filename:
+        print(f"Файл без расширения: {filename}")
+        return None
+    ext = filename.rsplit('.', 1)[1].lower()
+    allowed_ext = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+    if ext not in allowed_ext:
+        print(f"Недопустимый формат: {ext}")
+        return None
     new_filename = f"review_{int(time.time())}.{ext}"
     filepath = os.path.join(current_app.config['REVIEW_PHOTO_FOLDER'], new_filename)
     try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
         img = Image.open(file)
-        img.thumbnail((800, 800))
-        img.save(filepath, quality=90)
+        img.save(filepath, format=ext.upper() if ext != 'jpg' else 'JPEG', quality=90)
         return new_filename
     except Exception as e:
         print(f"Ошибка обработки фото: {e}")
