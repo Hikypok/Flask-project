@@ -85,7 +85,7 @@
                 <small class="text-muted">{{ review.created_date.strftime('%d.%m.%Y') }}</small>
             </div>
 
-            <p class="card-text">{{ review.content[:200] }}{% if review.content|length > 200 %}...{% endif %}</p>
+            <p class="card-text">{{ review.content }}</p>
 
             {% if review.category == 'places' and review.address %}
             <div class="mt-2">
